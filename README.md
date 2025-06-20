@@ -1,12 +1,36 @@
-# React + Vite
+# 🏥 Emergency Navigator – Nearby Hospital Locator
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+**Emergency Navigator** is a real-time emergency assistance web application that helps users locate **nearby hospitals** quickly and efficiently using their current location. This version is focused on hospital discovery using an interactive map.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## ✨ Features
 
-## Expanding the ESLint configuration
+- 📍 Detects your real-time location using browser GPS
+- 🏥 Displays nearby **hospitals** within a few kilometers radius
+- 🗺️ Interactive and responsive map powered by **Leaflet.js** and **OpenStreetMap**
+- 💨 Smooth user interface built with **React** and **Tailwind CSS**
+- 📱 Mobile-friendly and lightweight
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+---
+
+## 🛠️ Tech Stack
+
+- **Frontend**: React.js, React Router
+- **Styling**: Tailwind CSS
+- **Maps & Geolocation**:
+  - Leaflet.js
+  - OpenStreetMap
+  - Browser Geolocation API
+- **Build Tool**: Vite
+
+---
+
+## 🚀 How to Run the Project Locally
+
+> Make sure Node.js and npm are installed.
+
+```bash
+cd Emergency-Navigator
+npm install
+npm run dev
