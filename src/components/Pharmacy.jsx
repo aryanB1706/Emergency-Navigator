@@ -31,7 +31,7 @@ export default function PharmacyMap() {
   const mapRef = useRef(null);
 
   const { isLoaded, loadError } = useJsApiLoader({
-    googleMapsApiKey: "AIzaSyDUhP2XMlfUQMSJyibV3Krh0W6pnnNmOao", // Replace with your key
+    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY, // Replace with your key
     libraries: ["places"],
   });
 
@@ -79,7 +79,7 @@ export default function PharmacyMap() {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
-              "X-Goog-Api-Key": "AIzaSyDUhP2XMlfUQMSJyibV3Krh0W6pnnNmOao",
+              "X-Goog-Api-Key": import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
               "X-Goog-FieldMask":
                 "places.displayName,places.location,places.formattedAddress,places.rating,places.userRatingCount",
             },
