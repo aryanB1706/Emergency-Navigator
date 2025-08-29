@@ -1,28 +1,34 @@
-import { useEffect,useState } from "react"
-import VoiceSos from "../components/VoiceSos";
+import { useEffect, useState } from "react";
+import { Geolocation } from "@capacitor/geolocation";
 
 export default function SOS() {
-  const [locationURL,setLocationURL]=useState("Getting location...");
+  const [locationURL, setLocationURL] = useState("Getting location...");
 
-  useEffect(()=>{
-    navigator.geolocation.getCurrentPosition((pos)=>{
-      const lat=pos.coords.latitude;
-      const lon=pos.coords.longitude;
+  // Function to fetch current location using Capacitor
+  const fetchLocation = async () => {
+    try {
+      const position = await Geolocation.getCurrentPosition({
+        enableHighAccuracy: true,
+        timeout: 10000
+      });
+      const lat = position.coords.latitude;
+      const lon = position.coords.longitude;
       setLocationURL(`https://maps.google.com/?q=${lat},${lon}`);
-    },
-    () => setLocationURL("Location not available")
-  );
-  },[]);
+    } catch (err) {
+      console.error("Geolocation error:", err);
+      setLocationURL("Location not available");
+    }
+  };
+
+  useEffect(() => {
+    fetchLocation();
+  }, []);
 
   const handleClick = () => {
     const message = `🚨 Emergency! I need help. Here is my location: ${locationURL}`;
     const whatsappURL = `https://wa.me/?text=${encodeURIComponent(message)}`;
     window.open(whatsappURL, "_blank");
   };
-
-  
-
-
 
   return (
     <div className="min-h-screen bg-red-50 flex flex-col items-center justify-center px-6 py-10 space-y-8">
@@ -38,10 +44,6 @@ export default function SOS() {
       >
         📍 Send Location via WhatsApp
       </button>
-
-      <div className="border-t-2 border-gray-300 w-1/2 my-6"></div>
-
-      <VoiceSos locationURL={locationURL} />
     </div>
-  )
+  );
 }

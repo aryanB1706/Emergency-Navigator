@@ -11,19 +11,19 @@ import { Card, CardContent } from "@mui/material";
 import { Geolocation } from "@capacitor/geolocation";
 
 const circleOptions = {
-  strokeColor: "#FF0000", // Red for blood bank
+  strokeColor: "#008000", // Green for pharmacy
   strokeOpacity: 0.8,
   strokeWeight: 2,
-  fillColor: "#FF0000",
+  fillColor: "#008000",
   fillOpacity: 0.2,
 };
 
-export default function BloodBankMap() {
+export default function PharmacyMap() {
   const [userPosition, setUserPosition] = useState(null);
-  const [bloodBanks, setBloodBanks] = useState([]);
-  const [selectedBank, setSelectedBank] = useState(null);
+  const [pharmacies, setPharmacies] = useState([]);
+  const [selectedPharmacy, setSelectedPharmacy] = useState(null);
   const [directionsResponse, setDirectionsResponse] = useState(null);
-  const [loadingBanks, setLoadingBanks] = useState(false);
+  const [loadingPharmacies, setLoadingPharmacies] = useState(false);
   const [steps, setSteps] = useState([]);
   const [radius, setRadius] = useState(5000);
   const [watchId, setWatchId] = useState(null);
@@ -52,7 +52,7 @@ export default function BloodBankMap() {
     return R * c;
   };
 
-  // Get user position using Capacitor
+  // 🔹 Get user position using Capacitor
   useEffect(() => {
     const getUserPosition = async () => {
       try {
@@ -66,13 +66,13 @@ export default function BloodBankMap() {
     getUserPosition();
   }, []);
 
-  // Fetch nearby blood banks
+  // 🔹 Fetch nearby pharmacies
   useEffect(() => {
     if (!userPosition || !isLoaded) return;
 
-    const fetchBloodBanks = async () => {
+    const fetchPharmacies = async () => {
       try {
-        setLoadingBanks(true);
+        setLoadingPharmacies(true);
         const response = await fetch(
           `https://places.googleapis.com/v1/places:searchText`,
           {
@@ -84,7 +84,7 @@ export default function BloodBankMap() {
                 "places.displayName,places.location,places.formattedAddress,places.rating,places.userRatingCount",
             },
             body: JSON.stringify({
-              textQuery: "blood bank",
+              textQuery: "pharmacy",
               locationBias: {
                 circle: { center: { latitude: userPosition.lat, longitude: userPosition.lng }, radius },
               },
@@ -95,39 +95,40 @@ export default function BloodBankMap() {
           }
         );
         const data = await response.json();
-        if (data.places) setBloodBanks(data.places);
+        if (data.places) setPharmacies(data.places);
       } catch (err) {
         console.error("Places API error:", err);
       } finally {
-        setLoadingBanks(false);
+        setLoadingPharmacies(false);
       }
     };
 
-    fetchBloodBanks();
+    fetchPharmacies();
   }, [userPosition, isLoaded, radius]);
 
+  // 🔹 Calculate route and track user
   const calculateRoute = useCallback(
-    async (bank) => {
+    async (pharmacy) => {
       if (!userPosition) return;
 
       const directionsService = new window.google.maps.DirectionsService();
       directionsService.route(
         {
           origin: userPosition,
-          destination: { lat: bank.location.latitude, lng: bank.location.longitude },
+          destination: { lat: pharmacy.location.latitude, lng: pharmacy.location.longitude },
           travelMode: window.google.maps.TravelMode.DRIVING,
         },
         (result, status) => {
           if (status === "OK") {
             setDirectionsResponse(result);
-            setSelectedBank(bank);
+            setSelectedPharmacy(pharmacy);
 
             const stepsList = result.routes[0].legs[0].steps.map((step) =>
               step.instructions.replace(/<[^>]+>/g, "")
             );
             setSteps(stepsList);
 
-            if (stepsList.length > 0) speakStep(`Navigating to ${bank.displayName.text}`);
+            if (stepsList.length > 0) speakStep(`Navigating to ${pharmacy.displayName.text}`);
           }
         }
       );
@@ -146,8 +147,8 @@ export default function BloodBankMap() {
           const dist = getDistance(
             newPos.lat,
             newPos.lng,
-            bank.location.latitude,
-            bank.location.longitude
+            pharmacy.location.latitude,
+            pharmacy.location.longitude
           );
           if (dist < 100) {
             speakStep("You have reached your destination.");
@@ -188,23 +189,26 @@ export default function BloodBankMap() {
             </>
           )}
 
-          {bloodBanks.map((bank, index) => (
+          {pharmacies.map((pharmacy, index) => (
             <MarkerF
               key={index}
-              position={{ lat: bank.location.latitude, lng: bank.location.longitude }}
-              title={bank.displayName.text}
-              onClick={() => calculateRoute(bank)}
+              position={{ lat: pharmacy.location.latitude, lng: pharmacy.location.longitude }}
+              title={pharmacy.displayName.text}
+              onClick={() => calculateRoute(pharmacy)}
             />
           ))}
 
-          {selectedBank && (
+          {selectedPharmacy && (
             <InfoWindowF
-              position={{ lat: selectedBank.location.latitude, lng: selectedBank.location.longitude }}
-              onCloseClick={() => setSelectedBank(null)}
+              position={{
+                lat: selectedPharmacy.location.latitude,
+                lng: selectedPharmacy.location.longitude,
+              }}
+              onCloseClick={() => setSelectedPharmacy(null)}
             >
               <div style={{ maxWidth: "250px", maxHeight: "200px", overflowY: "auto" }}>
-                <h4 className="font-bold">{selectedBank.displayName.text}</h4>
-                <p className="text-sm">{selectedBank.formattedAddress}</p>
+                <h4 className="font-bold">{selectedPharmacy.displayName.text}</h4>
+                <p className="text-sm">{selectedPharmacy.formattedAddress}</p>
               </div>
             </InfoWindowF>
           )}
@@ -220,7 +224,7 @@ export default function BloodBankMap() {
           <select
             value={radius}
             onChange={(e) => setRadius(Number(e.target.value))}
-            className="p-2 ml-2 rounded-md border focus:outline-none focus:ring-2 focus:ring-red-500"
+            className="p-2 ml-2 rounded-md border focus:outline-none focus:ring-2 focus:ring-green-500"
           >
             <option value={2000}>2 km</option>
             <option value={5000}>5 km</option>
@@ -229,25 +233,25 @@ export default function BloodBankMap() {
           </select>
         </div>
 
-        <h2 className="text-center text-lg font-semibold mb-2">Nearby Blood Banks</h2>
-        {loadingBanks ? (
-          <p>Searching blood banks...</p>
-        ) : bloodBanks.length > 0 ? (
-          bloodBanks.map((bank, idx) => (
+        <h2 className="text-center text-lg font-semibold mb-2">Nearby Pharmacies</h2>
+        {loadingPharmacies ? (
+          <p>Searching pharmacies...</p>
+        ) : pharmacies.length > 0 ? (
+          pharmacies.map((pharmacy, idx) => (
             <Card
               key={idx}
               className="mb-3 cursor-pointer shadow hover:shadow-lg transition"
-              onClick={() => calculateRoute(bank)}
+              onClick={() => calculateRoute(pharmacy)}
             >
               <CardContent>
-                <h4 className="font-bold">{bank.displayName.text}</h4>
-                <p className="text-gray-600">{bank.formattedAddress}</p>
-                <p>⭐ {bank.rating || "N/A"}</p>
+                <h4 className="font-bold">{pharmacy.displayName.text}</h4>
+                <p className="text-gray-600">{pharmacy.formattedAddress}</p>
+                <p>⭐ {pharmacy.rating || "N/A"}</p>
               </CardContent>
             </Card>
           ))
         ) : (
-          <p>No blood banks found</p>
+          <p>No pharmacies found</p>
         )}
 
         {steps.length > 0 && (

@@ -1,5 +1,5 @@
 import CommonDropdown from "../components/CommonDropdown";
-import BloodBankMap from "../components/BloodBankMap";
+import PharmacyMap from "../components/Pharmacy";
 
 export default function Bloodbank() {
   return (
@@ -9,11 +9,11 @@ export default function Bloodbank() {
 
       
       <h2 className="text-2xl font-bold mb-4 text-center">
-        Nearby Blood Banks
+        Nearby Pharmacies
       </h2>
 
       {/* 🔹 Map */}
-      <BloodBankMap />
+      <PharmacyMap />
     </div>
   );
 }
